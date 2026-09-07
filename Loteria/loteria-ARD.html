@@ -25,22 +25,23 @@
     color:var(--papel);
     font-family:'Libre Baskerville', Georgia, serif;
     min-height:100vh;
+    padding:20px;
   }
   .marco{
-    max-width:820px;
+    max-width:100%;
     margin:0 auto;
-    padding:44px 20px 70px;
+    padding:0;
   }
   header{
     text-align:center;
-    margin-bottom:34px;
+    margin-bottom:30px;
   }
   header .logo-empresa{
-    width:190px;
-    margin:0 auto 22px;
+    width:120px;
+    margin:0 auto 16px;
     background:var(--papel);
-    padding:14px 18px;
-    border-radius:8px;
+    padding:10px 12px;
+    border-radius:6px;
     display:inline-block;
   }
   header .logo-empresa svg{
@@ -51,21 +52,21 @@
   header .ceja{
     font-family:'Big Shoulders Display', sans-serif;
     font-weight:600;
-    font-size:14px;
+    font-size:13px;
     letter-spacing:0.06em;
     color:var(--marigold);
   }
   header h1{
     font-family:'Big Shoulders Display', sans-serif;
     font-weight:800;
-    font-size:clamp(40px, 8vw, 68px);
+    font-size:clamp(32px, 6vw, 52px);
     line-height:0.95;
     margin:4px 0 8px;
     color:var(--papel);
   }
   header p{
     color:rgba(244,233,210,0.65);
-    font-size:15px;
+    font-size:14px;
     max-width:48ch;
     margin:0 auto;
   }
@@ -73,15 +74,14 @@
   .carta{
     background:var(--papel);
     color:var(--tinta);
-    border:3px solid var(--tinta);
-    border-radius:6px;
-    padding:30px 28px;
+    border:2px solid var(--tinta);
+    border-radius:4px;
+    padding:20px;
     position:relative;
-    box-shadow: 0 0 0 6px var(--papel), 0 0 0 9px var(--tinta);
     margin:0 auto 30px;
-    max-width:420px;
+    max-width:600px;
     text-align:center;
-    min-height:320px;
+    min-height:500px;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -94,9 +94,12 @@
     to{ transform: scale(1) rotate(0deg); opacity:1; }
   }
   .carta .icono-grande{
-    width:96px;
-    height:96px;
-    margin-bottom:10px;
+    width:280px;
+    height:380px;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
   }
   .carta .icono-grande img{
     width:100%;
@@ -106,28 +109,29 @@
   .carta .numero{
     font-family:'Big Shoulders Display', sans-serif;
     font-weight:800;
-    font-size:22px;
+    font-size:18px;
     color:var(--magenta);
     letter-spacing:0.05em;
   }
   .carta .nombre{
     font-family:'Big Shoulders Display', sans-serif;
     font-weight:800;
-    font-size:clamp(28px,6.5vw,38px);
+    font-size:clamp(26px, 5vw, 36px);
     color:var(--tinta);
-    margin:4px 0 14px;
+    margin:8px 0 12px;
     line-height:1;
   }
   .carta .canto{
     font-style:italic;
-    font-size:16px;
+    font-size:15px;
     line-height:1.5;
     color:rgba(43,33,26,0.85);
-    max-width:34ch;
+    max-width:36ch;
   }
   .carta .placeholder{
     color:rgba(43,33,26,0.4);
     font-style:italic;
+    font-size:16px;
   }
 
   .controles{
@@ -135,14 +139,14 @@
     justify-content:center;
     gap:10px;
     flex-wrap:wrap;
-    margin-bottom:14px;
+    margin-bottom:20px;
   }
   button{
     font-family:'Big Shoulders Display', sans-serif;
     font-weight:600;
-    font-size:16px;
+    font-size:15px;
     letter-spacing:0.02em;
-    padding:12px 26px;
+    padding:11px 24px;
     border-radius:4px;
     border:2px solid var(--papel);
     background:var(--magenta);
@@ -159,7 +163,7 @@
     justify-content:center;
     gap:22px;
     flex-wrap:wrap;
-    margin:18px 0 8px;
+    margin:16px 0 12px;
     font-family:'Big Shoulders Display', sans-serif;
     font-size:13px;
   }
@@ -178,16 +182,17 @@
     text-align:center;
     font-size:13px;
     color:rgba(244,233,210,0.55);
-    margin-bottom:26px;
+    margin-bottom:20px;
     min-height:18px;
   }
 
   .tabla{
     display:grid;
     grid-template-columns:repeat(9, 1fr);
-    gap:6px;
-    max-width:560px;
+    gap:8px;
+    max-width:900px;
     margin:0 auto;
+    padding:0 10px;
   }
   .casilla{
     aspect-ratio:1;
@@ -201,17 +206,25 @@
     overflow:hidden;
     cursor:pointer;
     transition:transform .1s ease;
+    background-size:contain;
+    background-repeat:no-repeat;
+    background-position:center;
   }
   .casilla:active{ transform:scale(0.92); }
   .casilla .num{
     font-family:'Big Shoulders Display', sans-serif;
     font-weight:600;
-    font-size:13px;
+    font-size:14px;
+    background:rgba(7,7,78,0.7);
+    padding:4px 6px;
+    border-radius:2px;
+    z-index:2;
   }
   .casilla .mini-icono{
     display:none;
-    width:60%;
-    height:60%;
+    width:100%;
+    height:100%;
+    position:absolute;
   }
   .casilla .mini-icono img{
     width:100%;
@@ -220,11 +233,15 @@
   }
   .casilla .etiqueta{
     position:absolute;
-    bottom:1px;
-    right:3px;
+    bottom:2px;
+    right:4px;
     font-family:'Big Shoulders Display', sans-serif;
     font-weight:700;
-    font-size:9px;
+    font-size:10px;
+    background:rgba(7,7,78,0.6);
+    padding:2px 4px;
+    border-radius:2px;
+    z-index:3;
   }
   .casilla.cantada{
     background:var(--teal);
@@ -235,12 +252,28 @@
     background:var(--marigold);
     border-color:var(--marigold);
     color:var(--tinta);
+    box-shadow:0 0 0 3px rgba(241,93,42,0.4);
   }
-  .casilla.cantada .num, .casilla.actual .num{ display:none; }
-  .casilla.cantada .mini-icono, .casilla.actual .mini-icono{ display:block; }
+  .casilla.cantada .num, .casilla.actual .num{ 
+    display:none; 
+  }
+  .casilla.cantada .mini-icono, .casilla.actual .mini-icono{ 
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
 
-  @media (max-width:480px){
+  @media (max-width:768px){
     .tabla{ grid-template-columns:repeat(6,1fr); }
+    .carta{ min-height:420px; }
+    .carta .icono-grande{ width:220px; height:300px; }
+  }
+  @media (max-width:480px){
+    .tabla{ grid-template-columns:repeat(5,1fr); gap:6px; }
+    .carta{ min-height:350px; padding:16px; }
+    .carta .icono-grande{ width:160px; height:220px; margin-bottom:12px; }
+    .carta .nombre{ font-size:clamp(22px, 5vw, 28px); }
+    header h1{ font-size:clamp(24px, 6vw, 40px); }
   }
 </style>
 </head>
@@ -458,6 +491,7 @@ function mostrarCarta(item){
   void cartaEl.offsetWidth; // reinicia animación
   cartaEl.innerHTML = `
     <div class="icono-grande"><img src="${getImagenCarta(item.n)}" alt="${item.carta}"></div>
+    <div class="numero">${item.n}</div>
     <div class="nombre">${item.carta}</div>
     <div class="canto">"${item.canto}"</div>
   `;
