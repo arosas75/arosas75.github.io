@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lotería Mexicana — Cantador automático</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Big+Shoulders+Display:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --papel: #F3F1EA;
+    --tinta: #07074e;
+    --magenta: #f15d2a;
+    --marigold: #f15d2a;
+    --teal: #005c90;
+    --linea: rgba(7,7,78,0.18);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--tinta);
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(241,93,42,0.16), transparent 40%),
+      radial-gradient(circle at 88% 82%, rgba(0,92,144,0.22), transparent 45%);
+    color:var(--papel);
+    font-family:'Libre Baskerville', Georgia, serif;
+    min-height:100vh;
+    padding:20px;
+  }
+  .marco{
+    max-width:100%;
+    margin:0 auto;
+    padding:0;
+  }
+  header{
+    text-align:center;
+    margin-bottom:30px;
+  }
+  header .logo-empresa{
+    width:120px;
+    margin:0 auto 16px;
+    background:var(--papel);
+    padding:10px 12px;
+    border-radius:6px;
+    display:inline-block;
+  }
+  header .logo-empresa svg{
+    width:100%;
+    height:auto;
+    display:block;
+  }
+  header .ceja{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:600;
+    font-size:13px;
+    letter-spacing:0.06em;
+    color:var(--marigold);
+  }
+  header h1{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:800;
+    font-size:clamp(32px, 6vw, 52px);
+    line-height:0.95;
+    margin:4px 0 8px;
+    color:var(--papel);
+  }
+  header p{
+    color:rgba(244,233,210,0.65);
+    font-size:14px;
+    max-width:48ch;
+    margin:0 auto;
+  }
+
+  .carta{
+    background:var(--papel);
+    color:var(--tinta);
+    border:2px solid var(--tinta);
+    border-radius:4px;
+    padding:20px;
+    position:relative;
+    margin:0 auto 30px;
+    max-width:600px;
+    text-align:center;
+    min-height:500px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    transition: transform .25s ease;
+  }
+  .carta.activa{ animation: aparece .35s ease; }
+  @keyframes aparece{
+    from{ transform: scale(0.92) rotate(-1.5deg); opacity:0.3; }
+    to{ transform: scale(1) rotate(0deg); opacity:1; }
+  }
+  .carta .icono-grande{
+    width:280px;
+    height:380px;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .carta .icono-grande img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+  .carta .numero{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:800;
+    font-size:18px;
+    color:var(--magenta);
+    letter-spacing:0.05em;
+  }
+  .carta .nombre{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:800;
+    font-size:clamp(26px, 5vw, 36px);
+    color:var(--tinta);
+    margin:8px 0 12px;
+    line-height:1;
+  }
+  .carta .canto{
+    font-style:italic;
+    font-size:15px;
+    line-height:1.5;
+    color:rgba(43,33,26,0.85);
+    max-width:36ch;
+  }
+  .carta .placeholder{
+    color:rgba(43,33,26,0.4);
+    font-style:italic;
+    font-size:16px;
+  }
+
+  .controles{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+  }
+  button{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:0.02em;
+    padding:11px 24px;
+    border-radius:4px;
+    border:2px solid var(--papel);
+    background:var(--magenta);
+    color:var(--papel);
+    cursor:pointer;
+    transition:transform .08s ease, opacity .15s ease;
+  }
+  button.secundario{ background:transparent; border-color:rgba(244,233,210,0.4); color:var(--papel); }
+  button:active{ transform:scale(0.96); }
+  button:disabled{ opacity:0.35; cursor:default; }
+
+  .ajustes{
+    display:flex;
+    justify-content:center;
+    gap:22px;
+    flex-wrap:wrap;
+    margin:16px 0 12px;
+    font-family:'Big Shoulders Display', sans-serif;
+    font-size:13px;
+  }
+  .ajustes .campo{ display:flex; flex-direction:column; gap:4px; align-items:center;}
+  .ajustes select, .ajustes input[type=range]{ font-family:inherit; }
+  select{
+    background:transparent;
+    color:var(--papel);
+    border:none;
+    border-bottom:1.5px solid var(--papel);
+    padding:4px 2px;
+  }
+  select option{ color:var(--tinta); }
+
+  .estado{
+    text-align:center;
+    font-size:13px;
+    color:rgba(244,233,210,0.55);
+    margin-bottom:20px;
+    min-height:18px;
+  }
+
+  .tabla{
+    display:grid;
+    grid-template-columns:repeat(9, 1fr);
+    gap:8px;
+    max-width:900px;
+    margin:0 auto;
+    padding:0 10px;
+  }
+  .casilla{
+    aspect-ratio:1;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1.5px solid rgba(244,233,210,0.3);
+    border-radius:3px;
+    color:rgba(244,233,210,0.5);
+    overflow:hidden;
+    cursor:pointer;
+    transition:transform .1s ease;
+    background-size:contain;
+    background-repeat:no-repeat;
+    background-position:center;
+  }
+  .casilla:active{ transform:scale(0.92); }
+  .casilla .num{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    background:rgba(7,7,78,0.7);
+    padding:4px 6px;
+    border-radius:2px;
+    z-index:2;
+  }
+  .casilla .mini-icono{
+    display:none;
+    width:100%;
+    height:100%;
+    position:absolute;
+  }
+  .casilla .mini-icono img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+  .casilla .etiqueta{
+    position:absolute;
+    bottom:2px;
+    right:4px;
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:700;
+    font-size:10px;
+    background:rgba(7,7,78,0.6);
+    padding:2px 4px;
+    border-radius:2px;
+    z-index:3;
+  }
+  .casilla.cantada{
+    background:var(--teal);
+    border-color:var(--teal);
+    color:var(--papel);
+  }
+  .casilla.actual{
+    background:var(--marigold);
+    border-color:var(--marigold);
+    color:var(--tinta);
+    box-shadow:0 0 0 3px rgba(241,93,42,0.4);
+  }
+  .casilla.cantada .num, .casilla.actual .num{ 
+    display:none; 
+  }
+  .casilla.cantada .mini-icono, .casilla.actual .mini-icono{ 
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  @media (max-width:768px){
+    .tabla{ grid-template-columns:repeat(6,1fr); }
+    .carta{ min-height:420px; }
+    .carta .icono-grande{ width:220px; height:300px; }
+  }
+  @media (max-width:480px){
+    .tabla{ grid-template-columns:repeat(5,1fr); gap:6px; }
+    .carta{ min-height:350px; padding:16px; }
+    .carta .icono-grande{ width:160px; height:220px; margin-bottom:12px; }
+    .carta .nombre{ font-size:clamp(22px, 5vw, 28px); }
+    header h1{ font-size:clamp(24px, 6vw, 40px); }
+  }
+</style>
+</head>
+<body>
+<div class="marco">
+  <header>
+    <div class="logo-empresa">
+      <svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 205.87 52.55">
+        <defs>
+          <style>
+            .cls-1a { fill: #07074e; stroke-width:0px; }
+            .cls-2a { fill: #f15d2a; stroke-width:0px; }
+            .cls-3a { fill: #005c90; stroke-width:0px; }
+          </style>
+        </defs>
+        <g id="Layer_1-2" data-name="Layer 1">
+          <g>
+            <g>
+              <path class="cls-1a" d="M69.48,52.55h-8.67V0h8.67v52.55Z"/>
+              <path class="cls-1a" d="M90.21,52.55h-8.67V0h8.67v52.55Z"/>
+              <path class="cls-1a" d="M110.94,52.55h-8.67V14.27h8.67v38.29Z"/>
+              <path class="cls-2a" d="M110.94,10.02h-8.67V.32h8.67v9.7Z"/>
+              <path class="cls-1a" d="M141.51,52.55h-8.85V8.38h-14.66V.12h38.18v8.26h-14.66v44.17Z"/>
+              <polygon class="cls-1a" points="181.48 23.41 195.63 .12 205.87 .12 185.87 32.62 185.87 52.55 177.05 52.55 177.05 32.62 181.48 23.41"/>
+              <polygon class="cls-3a" points="177.05 32.62 157.05 .12 167.29 .12 181.48 23.41 177.05 32.62"/>
+              <polygon class="cls-3a" points="36.42 32.92 18.06 32.92 27.3 11.22 22.63 .12 0 52.55 9.91 52.55 14.85 41.11 39.64 41.11 36.42 32.92"/>
+              <polygon class="cls-1a" points="22.63 .12 31.85 .12 54.52 52.55 44.57 52.55 39.64 41.11 22.63 .12"/>
+            </g>
+            <polygon class="cls-2a" points="18.14 .23 10.23 18.08 5.61 .11 18.14 .23"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="ceja">54 cartas · sin repetir</div>
+    <h1>Lotería Mexicana</h1>
+    <p>Presiona iniciar y el cantador irá diciendo las cartas en orden aleatorio, sin repetir, hasta terminar el mazo.</p>
+  </header>
+
+  <div class="carta" id="carta">
+    <div class="placeholder">Presiona "Iniciar lotería" para comenzar</div>
+  </div>
+
+  <div class="controles">
+    <button id="btnIniciar">Iniciar lotería</button>
+    <button id="btnPausar" class="secundario" disabled>Pausar</button>
+    <button id="btnReiniciar" class="secundario">Reiniciar mazo</button>
+  </div>
+
+  <div class="ajustes">
+    <div class="campo">
+      <label for="voz">Voz</label>
+      <select id="voz"></select>
+    </div>
+    <div class="campo">
+      <label for="espera">Pausa entre cartas</label>
+      <select id="espera">
+        <option value="3000">3 seg</option>
+        <option value="5000" selected>5 seg</option>
+        <option value="7000">7 seg</option>
+        <option value="10000">10 seg</option>
+      </select>
+    </div>
+  </div>
+
+  <p class="estado" id="estado"></p>
+
+  <div class="tabla" id="tabla"></div>
+</div>
+
+<script>
+const DATOS = [
+  {n:1, canto:"El que le cantó a San Pedro.", carta:"El gallo"},
+  {n:2, canto:"Pórtate bien, cuatito. Si no, te lleva el coloradito.", carta:"El diablito"},
+  {n:3, canto:"Puliendo el paso, por toda la calle real.", carta:"La dama"},
+  {n:4, canto:"Don Ferruco en la alameda, su bastón quería tirar.", carta:"El catrín"},
+  {n:5, canto:"Para el sol y para el agua.", carta:"El paraguas"},
+  {n:6, canto:"Medio cuerpo de señora, se divisa en altamar.", carta:"La sirena"},
+  {n:7, canto:"Súbeme paso a pasito. No quieras pegar brinquitos.", carta:"La escalera"},
+  {n:8, canto:"La herramienta del borracho.", carta:"La botella"},
+  {n:9, canto:"Tanto bebió el albañil, que quedó como barril.", carta:"El barril"},
+  {n:10, canto:"El que a buen árbol se arrima, buena sombra le cobija.", carta:"El árbol"},
+  {n:11, canto:"Me lo das o me lo quitas.", carta:"El melón"},
+  {n:12, canto:"¿Por qué le corres, cobarde, trayendo tan buen puñal?", carta:"El valiente"},
+  {n:13, canto:"Ponle su gorrito al nene. No se nos vaya a resfriar.", carta:"El gorrito"},
+  {n:14, canto:"La muerte tilica y flaca.", carta:"La muerte"},
+  {n:15, canto:"El que espera, desespera.", carta:"La pera"},
+  {n:16, canto:"Verde, blanco y colorado. La bandera del soldado.", carta:"La bandera"},
+  {n:17, canto:"Tocando su bandolón, está el mariachi Simón.", carta:"El bandolón"},
+  {n:18, canto:"Creciendo se fue hasta el cielo, y como no fue violín, tuvo que ser violonchelo.", carta:"El violonchelo"},
+  {n:19, canto:"Al otro lado del río tengo mi banco de arena, donde se sienta mi chata, pico de garza morena.", carta:"La garza"},
+  {n:20, canto:"Tú me traes a puros brincos, como pájaro en la rama.", carta:"El pájaro"},
+  {n:21, canto:"La mano pide dinero. Que se ponga a trabajar.", carta:"La mano"},
+  {n:22, canto:"Una bota igual que la otra.", carta:"La bota"},
+  {n:23, canto:"El farol de los enamorados.", carta:"La luna"},
+  {n:24, canto:"Perico, dacá la pata y empiézame a platicar, los trabajos que pasabas cuando no sabías hablar.", carta:"El cotorro"},
+  {n:25, canto:"¡Ah, qué borracho tan necio! Ya no lo puedo aguantar.", carta:"El borracho"},
+  {n:26, canto:"El que se comió el azúcar.", carta:"El negrito"},
+  {n:27, canto:"No me extrañes, corazón, que regreso en el camión.", carta:"El corazón"},
+  {n:28, canto:"La barriga que Juan tenía, era empacho de sandía.", carta:"La sandía"},
+  {n:29, canto:"No te arrugues, cuero viejo, que te quiero pa tambor.", carta:"El tambor"},
+  {n:30, canto:"Camarón que se duerme, se lo lleva la corriente.", carta:"El camarón"},
+  {n:31, canto:"Las jaras del indio Adán, donde pegan, dan.", carta:"Las jaras"},
+  {n:32, canto:"El músico trompa de hule, ya no me quiere tocar.", carta:"El músico"},
+  {n:33, canto:"Atarántamela a palos. No me la dejes llegar.", carta:"La araña"},
+  {n:34, canto:"Uno, dos y tres. El soldado p'al cuartel.", carta:"El soldado"},
+  {n:35, canto:"La guía de los marineros.", carta:"La estrella"},
+  {n:36, canto:"El caso que te hago es poco, el cazo es averiguar", carta:"El cazo"},
+  {n:37, canto:"Este mundo es una bola y nosotros un balón.", carta:"El mundo"},
+  {n:38, canto:"¡Ah, Chihuahua! Cuánto apache, con pantalón y huarache.", carta:"El apache"},
+  {n:39, canto:"Al nopal lo van a ver, nomás cuando tiene tunas.", carta:"El nopal"},
+  {n:40, canto:"El que con la cola pica.", carta:"El alacrán"},
+  {n:41, canto:"Rosita, Rosaura, ven que te quiero ahora.", carta:"La rosa"},
+  {n:42, canto:"Al pasar por el panteón, me encontré un calaverón.", carta:"La calavera"},
+  {n:43, canto:"Tú con la campana y yo con tu hermana.", carta:"La campana"},
+  {n:44, canto:"¡Hay cantarito de pulque! no te vayas a quebrar, pos te quiere la patrona pa poderme enamorar.", carta:"El cantarito"},
+  {n:45, canto:"Saltando va buscando, pero no ve nada.", carta:"El venado"},
+  {n:46, canto:"La cobija de los pobres.", carta:"El sol"},
+  {n:47, canto:"El sombrero de los reyes.", carta:"La corona"},
+  {n:48, canto:"Rema y rema va Lupita, sentada en su chalupita.", carta:"La chalupa"},
+  {n:49, canto:"El pino de la Alameda, siempre verde y siempre hermoso.", carta:"El pino"},
+  {n:50, canto:"El que por la boca muere, aunque mudo fuere.", carta:"El pescado"},
+  {n:51, canto:"Palmero sube a la palma, y bájame un coco real.", carta:"La palma"},
+  {n:52, canto:"El que nace pa maceta, no sale del corredor.", carta:"La maceta"},
+  {n:53, canto:"El arpa vieja de mi suegra, ya no sirve pa tocar.", carta:"El arpa"},
+  {n:54, canto:"Al ver a la verde rana, qué brinco pegó tu hermana.", carta:"La rana"}
+];
+
+// Función para obtener la ruta de la imagen
+function getImagenCarta(numero){
+  return `${numero.toString().padStart(2, '0')}.png`;
+}
+
+const cartaEl = document.getElementById('carta');
+const btnIniciar = document.getElementById('btnIniciar');
+const btnPausar = document.getElementById('btnPausar');
+const btnReiniciar = document.getElementById('btnReiniciar');
+const vozEl = document.getElementById('voz');
+const esperaEl = document.getElementById('espera');
+const estadoEl = document.getElementById('estado');
+const tablaEl = document.getElementById('tabla');
+
+let vocesEs = [];
+let mazo = [];
+let indiceActual = -1;
+let pausado = false;
+let enCurso = false;
+let temporizador = null;
+
+// Construir la tabla visual de 54 casillas (número + imagen oculta hasta que se cante)
+for(let i=1;i<=54;i++){
+  const c = document.createElement('div');
+  c.className = 'casilla';
+  c.id = 'casilla-'+i;
+  c.title = 'Toca para escuchar el nombre de esta carta';
+  c.innerHTML = `<span class="num">${i}</span><span class="mini-icono"><img src="${getImagenCarta(i)}" alt="Carta ${i}"></span><span class="etiqueta">${i}</span>`;
+  c.addEventListener('click', ()=> decirNombreCarta(i));
+  tablaEl.appendChild(c);
+}
+
+function decirNombreCarta(n){
+  const item = DATOS[n-1];
+  if(!item) return;
+  const utter = new SpeechSynthesisUtterance(item.carta);
+  if(vocesEs.length){
+    utter.voice = vocesEs[vozEl.value] || vocesEs[0];
+  }
+  utter.lang = 'es-419';
+  speechSynthesis.speak(utter);
+}
+
+function cargarVoces(){
+  const todas = speechSynthesis.getVoices();
+  vocesEs = todas.filter(v => v.lang.toLowerCase().startsWith('es'));
+  vozEl.innerHTML = '';
+  if(vocesEs.length === 0){
+    const opt = document.createElement('option');
+    opt.textContent = 'Voz predeterminada del sistema';
+    vozEl.appendChild(opt);
+    return;
+  }
+  vocesEs.forEach((v,i)=>{
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = `${v.name} (${v.lang})`;
+    vozEl.appendChild(opt);
+  });
+}
+speechSynthesis.onvoiceschanged = cargarVoces;
+cargarVoces();
+
+function barajar(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function hablar(texto, callback){
+  speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(texto);
+  if(vocesEs.length){
+    utter.voice = vocesEs[vozEl.value] || vocesEs[0];
+  }
+  utter.lang = 'es-419';
+  utter.rate = 1;
+  utter.onend = callback;
+  utter.onerror = callback;
+  speechSynthesis.speak(utter);
+}
+
+function mostrarCarta(item){
+  cartaEl.classList.remove('activa');
+  void cartaEl.offsetWidth; // reinicia animación
+  cartaEl.innerHTML = `
+    <div class="icono-grande"><img src="${getImagenCarta(item.n)}" alt="${item.carta}"></div>
+    <div class="numero">${item.n}</div>
+    <div class="nombre">${item.carta}</div>
+    <div class="canto">"${item.canto}"</div>
+  `;
+  cartaEl.classList.add('activa');
+}
+
+function marcarCasilla(n, tipo){
+  document.querySelectorAll('.casilla.actual').forEach(c=>c.classList.remove('actual'));
+  const c = document.getElementById('casilla-'+n);
+  if(c) c.classList.add(tipo);
+}
+
+function actualizarEstado(){
+  const restantes = mazo.length - (indiceActual+1);
+  estadoEl.textContent = `Carta ${indiceActual+1} de ${mazo.length} · quedan ${restantes} por cantar`;
+}
+
+function siguienteCarta(){
+  if(pausado || !enCurso) return;
+  indiceActual++;
+  if(indiceActual >= mazo.length){
+    estadoEl.textContent = '¡Se acabó el mazo! Lotería completa';
+    enCurso = false;
+    btnIniciar.disabled = false;
+    btnIniciar.textContent = 'Jugar otra vez';
+    btnPausar.disabled = true;
+    return;
+  }
+  const item = mazo[indiceActual];
+  mostrarCarta(item);
+  marcarCasilla(item.n, 'actual');
+  actualizarEstado();
+
+  hablar(`${item.canto} ${item.carta}.`, ()=>{
+    marcarCasilla(item.n, 'cantada');
+    document.getElementById('casilla-'+item.n).classList.remove('actual');
+    document.getElementById('casilla-'+item.n).classList.add('cantada');
+    if(enCurso && !pausado){
+      temporizador = setTimeout(siguienteCarta, parseInt(esperaEl.value));
+    }
+  });
+}
+
+function iniciarMazo(){
+  mazo = barajar(DATOS);
+  indiceActual = -1;
+  document.querySelectorAll('.casilla').forEach(c=> c.classList.remove('cantada','actual'));
+  cartaEl.innerHTML = '<div class="placeholder">Presiona "Iniciar lotería" para comenzar</div>';
+  estadoEl.textContent = '';
+}
+
+btnIniciar.addEventListener('click', ()=>{
+  if(mazo.length === 0 || indiceActual >= mazo.length){
+    iniciarMazo();
+  }
+  enCurso = true;
+  pausado = false;
+  btnIniciar.disabled = true;
+  btnPausar.disabled = true; // se habilita cuando arranca la primera carta
+  btnPausar.textContent = 'Pausar';
+  estadoEl.textContent = 'Preparando la baraja...';
+
+  hablar('¡Corre y se va corriendo!', ()=>{
+    if(!enCurso || pausado) return;
+    btnPausar.disabled = false;
+    siguienteCarta();
+  });
+});
+
+btnPausar.addEventListener('click', ()=>{
+  if(!enCurso) return;
+  pausado = !pausado;
+  if(pausado){
+    clearTimeout(temporizador);
+    speechSynthesis.cancel();
+    btnPausar.textContent = 'Reanudar';
+    estadoEl.textContent += ' · en pausa';
+    hablar('¡LOTERÍA!', ()=>{});
+  } else {
+    btnPausar.textContent = 'Pausar';
+    temporizador = setTimeout(siguienteCarta, 300);
+  }
+});
+
+btnReiniciar.addEventListener('click', ()=>{
+  clearTimeout(temporizador);
+  speechSynthesis.cancel();
+  enCurso = false;
+  pausado = false;
+  btnIniciar.disabled = false;
+  btnIniciar.textContent = 'Iniciar lotería';
+  btnPausar.disabled = true;
+  iniciarMazo();
+});
+</script>
+</body>
+</html>
