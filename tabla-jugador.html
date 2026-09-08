@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi tabla — Lotería Mexicana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Big+Shoulders+Display:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --papel: #F3F1EA;
+    --tinta: #07074e;
+    --naranja: #f15d2a;
+    --azul: #005c90;
+    --linea: rgba(7,7,78,0.18);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--tinta);
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(241,93,42,0.16), transparent 40%),
+      radial-gradient(circle at 88% 82%, rgba(0,92,144,0.22), transparent 45%);
+    color:var(--papel);
+    font-family:'Libre Baskerville', Georgia, serif;
+    min-height:100vh;
+  }
+  .marco{
+    max-width:520px;
+    margin:0 auto;
+    padding:40px 16px 60px;
+  }
+  header{
+    text-align:center;
+    margin-bottom:26px;
+  }
+  header .ceja{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:0.06em;
+    color:var(--naranja);
+  }
+  header h1{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:800;
+    font-size:clamp(32px, 8vw, 50px);
+    line-height:1;
+    margin:4px 0 8px;
+  }
+  header p{
+    color:rgba(244,233,210,0.65);
+    font-size:14px;
+    max-width:44ch;
+    margin:0 auto;
+  }
+
+  .tabla{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:0;
+    border:1px solid rgba(244,233,210,0.25);
+    margin:0 auto 22px;
+    max-width:480px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  }
+  .casilla{
+    aspect-ratio:113/179;
+    position:relative;
+    cursor:pointer;
+    overflow:hidden;
+    border:0.5px solid rgba(244,233,210,0.2);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .casilla img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    user-select:none;
+    -webkit-user-drag:none;
+  }
+  .casilla .marca{
+    position:absolute;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(7,7,78,0.42);
+  }
+  .casilla .frijol{
+    width:34%;
+    aspect-ratio:1;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #d98a4a, #7a3c15 75%);
+    box-shadow:0 3px 6px rgba(0,0,0,0.5), inset 0 -3px 4px rgba(0,0,0,0.35);
+  }
+  .casilla.marcada .marca{ display:flex; }
+  .casilla:active{ transform:scale(0.96); }
+
+  .controles{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+  }
+  .tamano{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .tamano button{
+    padding:8px 18px;
+    font-size:13px;
+    background:transparent;
+    border:1.5px solid rgba(244,233,210,0.35);
+    color:rgba(244,233,210,0.7);
+  }
+  .tamano button.activo{
+    background:var(--azul);
+    border-color:var(--azul);
+    color:var(--papel);
+  }
+  button{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:0.02em;
+    padding:12px 22px;
+    border-radius:4px;
+    border:2px solid var(--papel);
+    background:var(--naranja);
+    color:var(--papel);
+    cursor:pointer;
+    transition:transform .08s ease, opacity .15s ease;
+  }
+  button.secundario{ background:transparent; border-color:rgba(244,233,210,0.4); color:var(--papel); }
+  button:active{ transform:scale(0.96); }
+
+  .pie{
+    text-align:center;
+    font-size:12.5px;
+    color:rgba(244,233,210,0.5);
+    margin-top:18px;
+  }
+</style>
+</head>
+<body>
+<div class="marco">
+  <header>
+    <div class="ceja" id="ceja">tu tabla · 4 × 4</div>
+    <h1>Mi tabla</h1>
+    <p>Toca una carta cuando la escuches cantar para marcarla. Tócala de nuevo si te equivocaste.</p>
+  </header>
+
+  <div class="tamano">
+    <button id="btn4x4" class="activo" data-size="4">4 × 4 (16 cartas)</button>
+    <button id="btn5x5" data-size="5">5 × 5 (25 cartas)</button>
+  </div>
+
+  <div class="tabla" id="tabla"></div>
+
+  <div class="controles">
+    <button id="btnNueva">Generar nueva tabla</button>
+    <button id="btnLimpiar" class="secundario">Limpiar marcas</button>
+  </div>
+
+  <p class="pie">Mantén esta ventana abierta junto al cantador mientras juegas.</p>
+</div>
+
+<script>
+const tablaEl = document.getElementById('tabla');
+const btnNueva = document.getElementById('btnNueva');
+const btnLimpiar = document.getElementById('btnLimpiar');
+const btn4x4 = document.getElementById('btn4x4');
+const btn5x5 = document.getElementById('btn5x5');
+const cejaEl = document.getElementById('ceja');
+
+let cartasActuales = [];
+let tamano = 4;
+
+function numerosAlAzar(cantidad, maximo){
+  const disponibles = Array.from({length: maximo}, (_, i) => i + 1);
+  for(let i = disponibles.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [disponibles[i], disponibles[j]] = [disponibles[j], disponibles[i]];
+  }
+  return disponibles.slice(0, cantidad);
+}
+
+function pintarTabla(){
+  cejaEl.textContent = `tu tabla · ${tamano} × ${tamano}`;
+  tablaEl.style.gridTemplateColumns = `repeat(${tamano}, 1fr)`;
+  tablaEl.innerHTML = '';
+  cartasActuales.forEach(n => {
+    const celda = document.createElement('div');
+    celda.className = 'casilla';
+    celda.dataset.numero = n;
+    const archivo = String(n).padStart(2, '0') + '.png';
+    celda.innerHTML = `
+      <img src="Loteria/${archivo}" alt="Carta ${n}" loading="lazy">
+      <div class="marca"><div class="frijol"></div></div>
+    `;
+    celda.addEventListener('click', () => celda.classList.toggle('marcada'));
+    tablaEl.appendChild(celda);
+  });
+}
+
+function generarNuevaTabla(){
+  cartasActuales = numerosAlAzar(tamano * tamano, 54);
+  pintarTabla();
+}
+
+function limpiarMarcas(){
+  document.querySelectorAll('.casilla.marcada').forEach(c => c.classList.remove('marcada'));
+}
+
+function cambiarTamano(nuevoTamano){
+  if(nuevoTamano === tamano) return;
+  tamano = nuevoTamano;
+  btn4x4.classList.toggle('activo', tamano === 4);
+  btn5x5.classList.toggle('activo', tamano === 5);
+  generarNuevaTabla();
+}
+
+btnNueva.addEventListener('click', generarNuevaTabla);
+btnLimpiar.addEventListener('click', limpiarMarcas);
+btn4x4.addEventListener('click', () => cambiarTamano(4));
+btn5x5.addEventListener('click', () => cambiarTamano(5));
+
+generarNuevaTabla();
+</script>
+</body>
+</html>
