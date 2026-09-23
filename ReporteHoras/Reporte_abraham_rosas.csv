@@ -1,0 +1,23 @@
+﻿fecha,cliente,proyecto,actividad,tiempo
+14/sep/2026,"alsuper",soporte,"prueba  agregar registro",1.00
+14/sep/2026,"alsuper",soporte,reporte,2.00
+9/sep/2026,graffic packaging,soporte,	corrección de datos de sucursal Tijuana,	2
+9/sep/2026,"alsuper",soporte,	corrección de datos de mismas tiendas,	2
+9/sep/2026,"alsuper",soporte,	preparar información para prueba de Inteligencia artificial,	2
+8/sep/2026,"alsuper",soporte,	junta semanal,	1
+31/ago/2026,"aislopuertas",soporte,	actualización de información de marzo,	2
+31/ago/2026,"aislopuertas",soporte,corrección de información duplicada  dos productos tenían el mismo código en la misma clave,2
+31/ago/2026,"alsuper",soporte,corrección en proceso de  mismas tiendas  por fecha de cierre de tienda  Jiménez,2
+1/sep/2026,"alsuper",soporte,junta semanal,1
+27/ago/2026,"alsuper",soporte,agregar cuentas de correo a usuarios para recuperar contraseña,2
+28/ago/2026,"alsuper",soporte,configurar artos para envío de correo de recuperación de contraseña,1.00
+04/sep/2026,"alsuper",soporte,validar información de inventario no cuadraba Por un artículo 99999999  que se estaba actualizando  con grupo de compra  material de empaque  pero en realidad pertenecía a diferentes grupos de compra,6.00
+28/Ago/2026,"alsuper",soporte,revisar información de mismas tiendas para tienda 86  no se estaba actualizando correctamente,6.00
+03/ago/2026,"al súper",soporte,"apoyo en diseño de escenario que no mostraba bien los periodos",1.00
+06/ago/2026,"al súper",soporte,"revisión del proceso de carga de presupuesto de e-commerce",2.00
+07/ago/2026,"al súper",soporte,"revisión de mal funcionamiento de Artus no está respondiendo",1.00
+11/ago/2026,"al súper",soporte,"revisión de  del sistema arthus  no mostraba datos  se volvió a publicar la seguridad de los usuarios",1.00
+11/ago/2026,"al súper",soporte,"ajustes finales al proceso de carga de presupuesto de ecommerce para que considere la carga de todo el año",1.00
+25/ago/2026,"al súper","calculada  proyecto merma calculada","generación  de nuevos indicadores calculados  con la dimensión merma calculada",4.00
+18/sep/2026,Ali,"reunión de snowflex","snowflake nos presentó su desarrollo",2.00
+04/may/2026,aislopuertas,"Power bi","corrección en proceso de carga",2.00
