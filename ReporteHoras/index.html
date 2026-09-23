@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte de actividades</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #EAE3D3;
+    --paper-dark: #DED5BF;
+    --ink: #22314F;
+    --ink-soft: #5B6478;
+    --stamp: #A63A2E;
+    --confirm: #3F6B4A;
+    --rule: #C9C0AC;
+    --rule-strong: #A79C82;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html,body{
+    margin:0; padding:0;
+    background: var(--paper-dark);
+    color: var(--ink);
+    font-family: 'Work Sans', system-ui, sans-serif;
+    min-height:100vh;
+  }
+
+  body{
+    display:flex;
+    justify-content:center;
+    padding: 40px 16px 80px;
+  }
+
+  .sheet{
+    width:100%;
+    max-width: 680px;
+    background: var(--paper);
+    border: 1px solid var(--rule-strong);
+    padding: 32px 32px 24px;
+  }
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 14px;
+    margin-bottom: 22px;
+  }
+
+  header h1{ font-size: 1.15rem; font-weight: 600; margin:0; }
+  header .fecha-hoy{ font-family:'Space Mono', monospace; font-size: 0.82rem; color: var(--ink-soft); }
+
+  .campo-consultor{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .campo-consultor label{
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  .campo-consultor select{
+    flex:1;
+    border: 1px solid var(--rule-strong);
+    background: #fff;
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 500;
+    font-size: 0.92rem;
+    padding: 8px 10px;
+  }
+  .campo-consultor select:focus{ outline:none; border-color: var(--ink); }
+
+  .instrucciones{
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin-bottom: 22px;
+  }
+  .instrucciones .ejemplo{
+    display:block;
+    margin-top: 6px;
+    font-family:'Space Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid var(--rule-strong);
+    padding: 8px 10px;
+  }
+
+  .dictado{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .mic-btn{
+    width: 84px; height: 84px;
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+  .mic-btn svg{ width: 30px; height:30px; }
+  .mic-btn:hover{ transform: scale(1.03); }
+  .mic-btn.grabando{
+    border-color: var(--stamp);
+    background: var(--stamp);
+    color: var(--paper);
+    animation: pulso 1.4s ease-in-out infinite;
+  }
+  @keyframes pulso{
+    0%{ box-shadow: 0 0 0 0 rgba(166,58,46,0.35); }
+    70%{ box-shadow: 0 0 0 14px rgba(166,58,46,0); }
+    100%{ box-shadow: 0 0 0 0 rgba(166,58,46,0); }
+  }
+  .mic-label{ font-size: 0.82rem; color: var(--ink-soft); min-height:1.2em; }
+
+  .mic-mini{
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 1px solid var(--rule-strong);
+    background: #fff;
+    color: var(--ink-soft);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .mic-mini svg{ width:13px; height:13px; }
+  .mic-mini.grabando{ border-color: var(--stamp); color: var(--stamp); background:#FBEAE7; }
+
+  .campos{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 16px;
+    margin-bottom: 18px;
+  }
+  .campo{ display:flex; flex-direction:column; gap: 5px; }
+  .campo.full{ grid-column: 1 / -1; }
+  .campo label{ font-size: 0.78rem; color: var(--ink-soft); }
+  .campo .entrada{ display:flex; align-items:center; gap: 8px; }
+
+  input[type="text"], input[type="date"], textarea{
+    width:100%;
+    border: 1px solid var(--rule-strong);
+    background: #fff;
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    font-size: 0.92rem;
+    padding: 8px 10px;
+  }
+  textarea{ min-height: 56px; resize: vertical; line-height:1.4; }
+  input:focus, textarea:focus{ outline:none; border-color: var(--ink); }
+  #tiempo{ font-family:'Space Mono', monospace; }
+
+  .btn-agregar{
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+  }
+  .btn-agregar:hover{ background: #16223a; }
+  .btn-agregar:disabled{ background: var(--rule-strong); cursor: not-allowed; }
+
+  .divisor{
+    display:flex; align-items:center; gap: 10px;
+    margin: 32px 0 14px;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+  }
+  .divisor::after{ content:""; flex:1; border-top: 1px solid var(--rule); }
+
+  table{ width:100%; border-collapse: collapse; }
+  th{
+    text-align:left;
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--rule-strong);
+    padding: 0 8px 8px 0;
+  }
+  td{
+    font-size: 0.88rem;
+    padding: 8px 8px 8px 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  td.tiempo, th.tiempo{ font-family:'Space Mono', monospace; white-space:nowrap; color: var(--confirm); }
+  td.fecha{ font-family:'Space Mono', monospace; white-space:nowrap; font-size:0.82rem; color: var(--ink-soft); }
+
+  .vacio{ color: var(--ink-soft); font-size: 0.88rem; padding: 14px 0; }
+
+  .acciones-archivo{
+    display:flex; gap: 10px; margin-top: 26px; flex-wrap: wrap;
+    border-top: 1px solid var(--rule); padding-top: 18px;
+  }
+  .btn-secundario{
+    background: transparent; color: var(--ink);
+    border: 1px solid var(--rule-strong);
+    padding: 8px 14px; font-size: 0.82rem;
+    font-family: 'Work Sans', sans-serif;
+    cursor: pointer;
+  }
+  .btn-secundario:hover{ border-color: var(--ink); }
+  .btn-secundario:disabled{ opacity: 0.45; cursor: not-allowed; }
+  .btn-secundario:disabled:hover{ border-color: var(--rule-strong); }
+
+  .estado-archivo{
+    font-size: 0.78rem; color: var(--ink-soft);
+    margin-top: 8px; font-family: 'Space Mono', monospace;
+  }
+
+  .aviso{
+    font-size: 0.82rem; background: #F4E8D8;
+    border: 1px solid var(--rule-strong);
+    padding: 10px 12px; margin-bottom: 20px; color: var(--ink);
+  }
+
+  @media (max-width: 480px){
+    .campos{ grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .mic-btn.grabando{ animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <header>
+    <h1>Reporte de actividades</h1>
+    <span class="fecha-hoy" id="fechaHoy"></span>
+  </header>
+
+  <div class="campo-consultor">
+    <label for="consultor">Consultor</label>
+    <select id="consultor">
+      <option value="" disabled selected>Selecciona un consultor…</option>
+      <option value="__nuevo__">+ Agregar nuevo consultor…</option>
+    </select>
+  </div>
+
+  <div id="avisoCompat" class="aviso" style="display:none;"></div>
+
+  <div class="instrucciones">
+    Dicta todo en una sola frase mencionando las cinco palabras clave, en cualquier orden:
+    <span class="ejemplo">"fecha 9 de septiembre, cliente Constructora ABC, proyecto Torre Norte, actividad revisión de planos, tiempo 2 horas"</span>
+    La página separa cada dato automáticamente: la fecha queda en el selector de calendario y el tiempo se guarda como número con 2 decimales. Revísalos abajo antes de agregar el registro; también puedes editarlos a mano o volver a dictar solo uno con el micrófono pequeño de cada campo.
+  </div>
+
+  <div class="dictado">
+    <button class="mic-btn" id="micBtn" aria-label="Dictar registro completo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+        <line x1="12" y1="19" x2="12" y2="23"></line>
+        <line x1="8" y1="23" x2="16" y2="23"></line>
+      </svg>
+    </button>
+    <div class="mic-label" id="micLabel">Toca para dictar el registro completo</div>
+  </div>
+
+  <div class="campos">
+    <div class="campo">
+      <label for="fecha">Fecha</label>
+      <div class="entrada">
+        <input type="date" id="fecha">
+        <button class="mic-mini" data-campo="fecha" aria-label="Dictar fecha"></button>
+      </div>
+    </div>
+    <div class="campo">
+      <label for="cliente">Cliente</label>
+      <div class="entrada">
+        <input type="text" id="cliente" list="listaClientesDatalist" placeholder="Nombre del cliente" autocomplete="off">
+        <datalist id="listaClientesDatalist"></datalist>
+        <button class="mic-mini" data-campo="cliente" aria-label="Dictar cliente"></button>
+      </div>
+    </div>
+    <div class="campo">
+      <label for="proyecto">Proyecto</label>
+      <div class="entrada">
+        <input type="text" id="proyecto" list="listaProyectosDatalist" placeholder="Nombre del proyecto" autocomplete="off">
+        <datalist id="listaProyectosDatalist"></datalist>
+        <button class="mic-mini" data-campo="proyecto" aria-label="Dictar proyecto"></button>
+      </div>
+    </div>
+    <div class="campo">
+      <label for="tiempo">Tiempo (horas)</label>
+      <div class="entrada">
+        <input type="text" id="tiempo" placeholder="1.50">
+        <button class="mic-mini" data-campo="tiempo" aria-label="Dictar tiempo"></button>
+      </div>
+    </div>
+    <div class="campo full">
+      <label for="actividad">Actividad</label>
+      <div class="entrada">
+        <textarea id="actividad" placeholder="Descripción de la actividad"></textarea>
+        <button class="mic-mini" data-campo="actividad" aria-label="Dictar actividad"></button>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-agregar" id="btnAgregar">Agregar registro</button>
+
+  <div class="divisor">registros guardados</div>
+
+  <table id="tabla" style="display:none;">
+    <thead>
+      <tr><th class="fecha">Fecha</th><th>Cliente</th><th>Proyecto</th><th>Actividad</th><th class="tiempo">Tiempo</th></tr>
+    </thead>
+    <tbody id="cuerpoTabla"></tbody>
+  </table>
+  <div class="vacio" id="vacioMsg">Todavía no hay registros. El primero que agregues aparecerá aquí.</div>
+
+  <div class="acciones-archivo">
+    <button class="btn-secundario" id="btnDescargar">Descargar Reporte.csv</button>
+    <button class="btn-secundario" id="btnLimpiar">Borrar todo y empezar de nuevo</button>
+  </div>
+  <div class="estado-archivo" id="estadoArchivo">Cargando registros guardados…</div>
+</div>
+
+<script>
+  // Este archivo SOLO dicta y llama a los archivos PHP (guardar.php, obtener.php,
+  // borrar.php, descargar.php). Toda la lectura/escritura de Reporte.csv la hace PHP.
+
+  const micSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+    <line x1="12" y1="19" x2="12" y2="23"></line>
+    <line x1="8" y1="23" x2="16" y2="23"></line>
+  </svg>`;
+  document.querySelectorAll('.mic-mini').forEach(b => b.innerHTML = micSvg);
+
+  let entries = [];        // lo que ya está guardado en el reporte del consultor activo
+  let consultorActual = ''; // nombre del consultor seleccionado ahora mismo
+  let listaClientes = [];  // nombres de clientes ya usados (según listas.php)
+  let listaProyectos = []; // nombres de proyectos ya usados (según listas.php)
+  let recognizing = false;
+  let recognition = null;
+  let modoActual = null;   // 'todo' | 'fecha' | 'cliente' | 'proyecto' | 'actividad' | 'tiempo'
+
+  const fechaHoyEl = document.getElementById('fechaHoy');
+  const micBtn = document.getElementById('micBtn');
+  const micLabel = document.getElementById('micLabel');
+  const fechaEl = document.getElementById('fecha');
+  const clienteEl = document.getElementById('cliente');
+  const proyectoEl = document.getElementById('proyecto');
+  const actividadEl = document.getElementById('actividad');
+  const tiempoEl = document.getElementById('tiempo');
+  const btnAgregar = document.getElementById('btnAgregar');
+  const tabla = document.getElementById('tabla');
+  const cuerpoTabla = document.getElementById('cuerpoTabla');
+  const vacioMsg = document.getElementById('vacioMsg');
+  const btnDescargar = document.getElementById('btnDescargar');
+  const btnLimpiar = document.getElementById('btnLimpiar');
+  const estadoArchivoEl = document.getElementById('estadoArchivo');
+  const avisoCompat = document.getElementById('avisoCompat');
+  const consultorEl = document.getElementById('consultor');
+
+  // Solo deja escribir dígitos y un separador decimal (. o ,), nada de letras.
+  tiempoEl.addEventListener('input', () => {
+    tiempoEl.value = tiempoEl.value.replace(/[^0-9.,]/g, '');
+  });
+
+  tiempoEl.addEventListener('blur', () => {
+    if (tiempoEl.value.trim()) tiempoEl.value = formatoTiempo(tiempoEl.value.trim());
+  });
+
+  const hoy = new Date();
+  fechaHoyEl.textContent = hoy.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+  fechaEl.value = hoy.toISOString().slice(0,10); // AAAA-MM-DD por defecto, editable con el selector
+
+  const MESES = { enero:1, febrero:2, marzo:3, abril:4, mayo:5, junio:6, julio:7,
+                   agosto:8, septiembre:9, setiembre:9, octubre:10, noviembre:11, diciembre:12 };
+  const MESES_ABREV = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+  // Convierte AAAA-MM-DD (lo que da el selector) a dd/mmm/aaaa, el formato que
+  // se guarda en el CSV, ej. 2026-09-09 -> 09/sep/2026.
+  function formatoFechaCSV(iso) {
+    if (!iso) return '';
+    const [anio, mes, dia] = iso.split('-');
+    const idx = parseInt(mes, 10) - 1;
+    if (idx < 0 || idx > 11) return iso;
+    return `${dia}/${MESES_ABREV[idx]}/${anio}`;
+  }
+
+  // Convierte una fecha dictada ("9 de septiembre", "9 de septiembre de 2026",
+  // "09/09/2026" u "hoy") al formato AAAA-MM-DD que necesita el selector de fecha.
+  function parseFechaHablada(texto) {
+    texto = texto.toLowerCase().trim();
+    if (/\bhoy\b/.test(texto)) return new Date().toISOString().slice(0,10);
+
+    let m = texto.match(/(\d{1,2})\s*(?:de)?\s*(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)(?:\s*(?:de|del)?\s*(\d{4}))?/);
+    if (m) {
+      const dia = parseInt(m[1], 10);
+      const mes = MESES[m[2]];
+      const anio = m[3] ? parseInt(m[3], 10) : new Date().getFullYear();
+      if (dia >= 1 && dia <= 31 && mes) {
+        return `${anio}-${String(mes).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+      }
+    }
+
+    m = texto.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+    if (m) {
+      const dia = parseInt(m[1], 10), mes = parseInt(m[2], 10);
+      let anio = parseInt(m[3], 10);
+      if (anio < 100) anio += 2000;
+      if (dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12) {
+        return `${anio}-${String(mes).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+      }
+    }
+    return null;
+  }
+
+  // Deja el tiempo siempre como número con 2 decimales, ej. "1.5" -> "1.50".
+  function formatoTiempo(valor) {
+    const num = parseFloat(String(valor).replace(',', '.'));
+    return isNaN(num) ? valor : num.toFixed(2);
+  }
+
+  const NUMEROS_HABLADOS = { cero:0, un:1, uno:1, una:1, dos:2, tres:3, cuatro:4, cinco:5,
+                              seis:6, siete:7, ocho:8, nueve:9, diez:10, once:11, doce:12 };
+
+  // Convierte lo dictado para el tiempo en un número, sin importar si vino como
+  // dígito ("1.5 horas") o como palabra ("una hora", "media hora",
+  // "dos horas y media", "un cuarto de hora"). Regresa null si no se entendió nada.
+  function parseTiempoHablado(texto) {
+    texto = texto.toLowerCase().trim();
+
+    // Si ya viene un número escrito, ese manda.
+    const digito = texto.match(/\d+([.,]\d+)?/);
+    if (digito) return parseFloat(digito[0].replace(',', '.'));
+
+    // Casos de fracciones dichas sin un número antes.
+    if (/\bhora\s+y\s+media\b/.test(texto)) return 1.5;
+    if (/\btres\s+cuartos?\s+de\s+hora\b/.test(texto)) return 0.75;
+    if (/\bmedia\s+hora\b/.test(texto)) return 0.5;
+    if (/\bcuarto\s+de\s+hora\b/.test(texto)) return 0.25;
+
+    // Número en palabras, con fracción opcional después ("dos horas y media").
+    const patron = new RegExp('\\b(' + Object.keys(NUMEROS_HABLADOS).join('|') + ')\\b\\s*(?:horas?)?\\s*(?:y\\s+(media|cuarto|tres\\s+cuartos))?');
+    const m = texto.match(patron);
+    if (m) {
+      let valor = NUMEROS_HABLADOS[m[1]];
+      if (m[2] === 'media') valor += 0.5;
+      else if (m[2] === 'cuarto') valor += 0.25;
+      else if (m[2] === 'tres cuartos' || (m[2] && m[2].startsWith('tres'))) valor += 0.75;
+      return valor;
+    }
+
+    return null;
+  }
+
+  // Quita espacios y acentos y pasa a minúsculas, para comparar textos sin
+  // importar cómo se hayan escrito o dictado ("Alsuper" y "al super" son iguales).
+  function normalizar(texto) {
+    return String(texto).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+  }
+
+  // Distancia de edición entre dos textos (cuántas letras hay que cambiar para
+  // que sean iguales). Sirve para saber qué tan parecido es lo dictado a un
+  // nombre que ya existe en la lista.
+  function distanciaEdicion(a, b) {
+    const filas = a.length + 1, columnas = b.length + 1;
+    const dp = Array.from({ length: filas }, () => new Array(columnas).fill(0));
+    for (let i = 0; i < filas; i++) dp[i][0] = i;
+    for (let j = 0; j < columnas; j++) dp[0][j] = j;
+    for (let i = 1; i < filas; i++) {
+      for (let j = 1; j < columnas; j++) {
+        const costo = a[i - 1] === b[j - 1] ? 0 : 1;
+        dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + costo);
+      }
+    }
+    return dp[filas - 1][columnas - 1];
+  }
+
+  // Busca en la lista el nombre más parecido a lo dictado. Si se parece lo
+  // suficiente (tolera pequeños errores de dictado), regresa el nombre tal
+  // como ya está guardado; si no hay nada parecido, regresa null.
+  function buscarCoincidencia(texto, lista) {
+    const normTexto = normalizar(texto);
+    if (!normTexto || lista.length === 0) return null;
+
+    let mejor = null, mejorDistancia = Infinity;
+    lista.forEach(item => {
+      const distancia = distanciaEdicion(normTexto, normalizar(item));
+      if (distancia < mejorDistancia) { mejorDistancia = distancia; mejor = item; }
+    });
+
+    const tolerancia = Math.max(1, Math.round(normTexto.length * 0.25));
+    return mejorDistancia <= tolerancia ? mejor : null;
+  }
+
+  function poblarDatalist(idDatalist, valores) {
+    const dl = document.getElementById(idDatalist);
+    dl.innerHTML = valores.map(v => `<option value="${String(v).replace(/"/g, '&quot;')}"></option>`).join('');
+  }
+
+  // ---------- Cargar clientes y proyectos ya guardados (vía listas.php) ----------
+  async function cargarListas() {
+    try {
+      const resp = await fetch('listas.php');
+      const data = await resp.json();
+      listaClientes = data.clientes || [];
+      listaProyectos = data.proyectos || [];
+      poblarDatalist('listaClientesDatalist', listaClientes);
+      poblarDatalist('listaProyectosDatalist', listaProyectos);
+    } catch (e) {
+      // Si falla, los campos siguen funcionando como texto libre, solo sin sugerencias.
+    }
+  }
+
+  // Si el nombre no estaba en la lista, lo agrega para la próxima vez.
+  // No es crítico: si falla, el registro ya quedó guardado en Reporte.csv igual.
+  async function registrarSiEsNuevo(tipo, valor) {
+    valor = (valor || '').trim();
+    if (!valor) return;
+    const lista = tipo === 'cliente' ? listaClientes : listaProyectos;
+    if (lista.some(item => normalizar(item) === normalizar(valor))) return;
+
+    try {
+      const resp = await fetch('listas.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo, valor })
+      });
+      const data = await resp.json();
+      if (data && data.ok && data.lista) {
+        if (tipo === 'cliente') { listaClientes = data.lista; poblarDatalist('listaClientesDatalist', listaClientes); }
+        else { listaProyectos = data.lista; poblarDatalist('listaProyectosDatalist', listaProyectos); }
+      }
+    } catch (e) { /* no crítico */ }
+  }
+
+
+  const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (SpeechRecognitionAPI) {
+    recognition = new SpeechRecognitionAPI();
+    recognition.lang = 'es-MX';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    let baseText = "";
+
+    function targetEl() {
+      return { fecha: fechaEl, cliente: clienteEl, proyecto: proyectoEl, actividad: actividadEl, tiempo: tiempoEl }[modoActual];
+    }
+
+    recognition.onstart = () => {
+      recognizing = true;
+      baseText = "";
+      if (modoActual === 'todo') {
+        micBtn.classList.add('grabando');
+        micLabel.textContent = "Escuchando… toca de nuevo para detener";
+      } else {
+        targetEl().closest('.entrada').querySelector('.mic-mini').classList.add('grabando');
+      }
+    };
+
+    recognition.onresult = (event) => {
+      let finalText = "";
+      let interimText = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalText += t + " ";
+        else interimText += t;
+      }
+      if (finalText) baseText += finalText;
+      const textoActual = (baseText + interimText).trim();
+
+      if (modoActual === 'todo') {
+        aplicarParseo(textoActual);
+      } else if (modoActual === 'fecha') {
+        const iso = parseFechaHablada(textoActual);
+        if (iso) fechaEl.value = iso;
+      } else if (modoActual === 'tiempo') {
+        const numero = parseTiempoHablado(textoActual);
+        tiempoEl.value = numero !== null ? numero.toFixed(2) : '';
+      } else if (modoActual === 'cliente' || modoActual === 'proyecto') {
+        const lista = modoActual === 'cliente' ? listaClientes : listaProyectos;
+        const corregido = buscarCoincidencia(textoActual, lista);
+        targetEl().value = corregido || textoActual;
+      } else {
+        targetEl().value = textoActual;
+      }
+    };
+
+    recognition.onerror = () => {
+      if (modoActual === 'todo') micLabel.textContent = "No se entendió el audio, intenta de nuevo.";
+    };
+
+    recognition.onend = () => {
+      recognizing = false;
+      micBtn.classList.remove('grabando');
+      micLabel.textContent = "Toca para dictar el registro completo";
+      document.querySelectorAll('.mic-mini').forEach(b => b.classList.remove('grabando'));
+      modoActual = null;
+    };
+
+    micBtn.addEventListener('click', () => {
+      if (recognizing) { recognition.stop(); return; }
+      modoActual = 'todo';
+      try { recognition.start(); } catch(e) {}
+    });
+
+    document.querySelectorAll('.mic-mini').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (recognizing) { recognition.stop(); return; }
+        modoActual = btn.dataset.campo;
+        try { recognition.start(); } catch(e) {}
+      });
+    });
+
+  } else {
+    micBtn.disabled = true;
+    micBtn.style.opacity = 0.4;
+    document.querySelectorAll('.mic-mini').forEach(b => { b.disabled = true; b.style.opacity = 0.4; });
+    avisoCompat.style.display = 'block';
+    avisoCompat.textContent = 'Este navegador no permite dictado por voz. Puedes escribir cada campo directamente. Para dictar, usa Chrome o Edge.';
+    micLabel.textContent = "Dictado no disponible en este navegador";
+  }
+
+  // ---------- Separar el dictado completo en los 5 campos ----------
+  function aplicarParseo(texto) {
+    const patrones = [
+      { campo: 'fecha', re: /\bfecha\b/i },
+      { campo: 'cliente', re: /\bcliente\b/i },
+      { campo: 'proyecto', re: /\bproyecto\b/i },
+      { campo: 'actividad', re: /\bactividad\b/i },
+      { campo: 'tiempo', re: /\b(tiempo|horas|hora)\b/i },
+    ];
+    let hallazgos = [];
+    patrones.forEach(p => {
+      const m = p.re.exec(texto);
+      if (m) hallazgos.push({ campo: p.campo, inicio: m.index, fin: m.index + m[0].length });
+    });
+    hallazgos.sort((a, b) => a.inicio - b.inicio);
+    if (hallazgos.length === 0) return;
+
+    hallazgos.forEach((h, i) => {
+      const desde = h.fin;
+      const hasta = i + 1 < hallazgos.length ? hallazgos[i + 1].inicio : texto.length;
+      let valor = texto.slice(desde, hasta).trim().replace(/^[:\-,]+/, '').trim();
+      if (!valor) return;
+
+      if (h.campo === 'fecha') {
+        const iso = parseFechaHablada(valor);
+        if (iso) fechaEl.value = iso;
+      } else if (h.campo === 'tiempo') {
+        const numero = parseTiempoHablado(valor);
+        tiempoEl.value = numero !== null ? numero.toFixed(2) : '';
+      } else if (h.campo === 'cliente' || h.campo === 'proyecto') {
+        const el = h.campo === 'cliente' ? clienteEl : proyectoEl;
+        const lista = h.campo === 'cliente' ? listaClientes : listaProyectos;
+        const corregido = buscarCoincidencia(valor, lista);
+        el.value = corregido || valor;
+      } else {
+        actividadEl.value = valor;
+      }
+    });
+  }
+
+  // ---------- Mostrar la tabla con lo que ya está guardado ----------
+  function renderTabla() {
+    if (entries.length === 0) {
+      tabla.style.display = 'none';
+      vacioMsg.style.display = 'block';
+      return;
+    }
+    tabla.style.display = 'table';
+    vacioMsg.style.display = 'none';
+    cuerpoTabla.innerHTML = entries.map(e => `
+      <tr>
+        <td class="fecha">${e.fecha}</td>
+        <td>${e.cliente}</td>
+        <td>${e.proyecto}</td>
+        <td>${e.actividad}</td>
+        <td class="tiempo">${e.tiempo}</td>
+      </tr>
+    `).join('');
+  }
+
+  function actualizarEstado() {
+    if (!consultorActual) {
+      estadoArchivoEl.textContent = 'Selecciona o agrega un consultor para comenzar.';
+      return;
+    }
+    const palabra = entries.length === 1 ? 'registro' : 'registros';
+    estadoArchivoEl.textContent = entries.length === 0
+      ? `Todavía no hay registros guardados para ${consultorActual}.`
+      : `${entries.length} ${palabra} guardados para ${consultorActual}.`;
+  }
+
+  // Mientras no haya un consultor elegido, no se puede dictar ni guardar nada:
+  // cada registro tiene que quedar en el archivo de alguien en concreto.
+  function actualizarDisponibilidad() {
+    const hayConsultor = !!consultorActual;
+    const hayDictado = !!SpeechRecognitionAPI;
+    micBtn.disabled = !hayConsultor || !hayDictado;
+    btnAgregar.disabled = !hayConsultor;
+    btnDescargar.disabled = !hayConsultor;
+    btnLimpiar.disabled = !hayConsultor;
+    document.querySelectorAll('.mic-mini').forEach(b => { b.disabled = !hayConsultor || !hayDictado; });
+  }
+
+  // ---------- Cargar la lista de consultores (vía consultores.php) ----------
+  async function cargarConsultores() {
+    try {
+      const resp = await fetch('consultores.php');
+      const data = await resp.json();
+      const nombres = (data && data.consultores) ? data.consultores : [];
+      const opcionNuevo = consultorEl.querySelector('option[value="__nuevo__"]');
+      // Quitamos opciones viejas (dejando el placeholder y "+ Agregar nuevo")
+      // antes de volver a poner las que llegaron del servidor.
+      consultorEl.querySelectorAll('option[data-consultor]').forEach(o => o.remove());
+      nombres.forEach(nombre => {
+        const opcion = document.createElement('option');
+        opcion.value = nombre;
+        opcion.textContent = nombre;
+        opcion.dataset.consultor = '1';
+        consultorEl.insertBefore(opcion, opcionNuevo);
+      });
+    } catch (e) {
+      estadoArchivoEl.textContent = 'No se pudo conectar con consultores.php. Verifica que esta página se esté abriendo desde un servidor con PHP (http/https), no con doble clic.';
+    }
+  }
+
+  // ---------- Cambiar de consultor: carga su reporte y limpia el formulario ----------
+  async function seleccionarConsultor(nombre) {
+    consultorActual = nombre;
+    // Los campos de un registro a medio dictar no deben pasarse a otro consultor.
+    clienteEl.value = "";
+    proyectoEl.value = "";
+    actividadEl.value = "";
+    tiempoEl.value = "";
+    actualizarDisponibilidad();
+    await cargarRegistros();
+  }
+
+  consultorEl.addEventListener('change', async () => {
+    const valor = consultorEl.value;
+
+    if (valor === '__nuevo__') {
+      const nombre = (prompt('Nombre del nuevo consultor:') || '').trim();
+      if (!nombre) {
+        // canceló: regresamos el select a lo que estaba antes
+        consultorEl.value = consultorActual || '';
+        return;
+      }
+      try {
+        const resp = await fetch('consultores.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ valor: nombre })
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data.ok) throw new Error(data.error || 'respuesta no válida');
+        await cargarConsultores();
+        consultorEl.value = nombre;
+        await seleccionarConsultor(nombre);
+      } catch (e) {
+        estadoArchivoEl.textContent = 'No se pudo agregar el consultor. Intenta de nuevo.';
+        consultorEl.value = consultorActual || '';
+      }
+      return;
+    }
+
+    await seleccionarConsultor(valor);
+  });
+
+  // ---------- Cargar lo que ya existe en el reporte del consultor activo ----------
+  async function cargarRegistros() {
+    if (!consultorActual) return;
+    btnAgregar.disabled = true;
+    estadoArchivoEl.textContent = 'Cargando registros guardados…';
+    try {
+      const resp = await fetch('obtener.php?consultor=' + encodeURIComponent(consultorActual));
+      const data = await resp.json();
+      entries = (data && data.registros) ? data.registros : [];
+    } catch (e) {
+      estadoArchivoEl.textContent = 'No se pudo conectar con obtener.php. Verifica que esta página se esté abriendo desde un servidor con PHP (http/https), no con doble clic.';
+      entries = [];
+      renderTabla();
+      actualizarDisponibilidad();
+      return;
+    }
+    actualizarDisponibilidad();
+    renderTabla();
+    actualizarEstado();
+  }
+
+  // ---------- Agregar un registro (vía guardar.php) ----------
+  btnAgregar.addEventListener('click', async () => {
+    if (!consultorActual) return;
+    const actividad = actividadEl.value.trim();
+    if (!actividad) { actividadEl.focus(); return; }
+
+    const entry = {
+      consultor: consultorActual,
+      fecha: formatoFechaCSV(fechaEl.value),
+      cliente: clienteEl.value.trim(),
+      proyecto: proyectoEl.value.trim(),
+      actividad: actividad,
+      tiempo: formatoTiempo(tiempoEl.value.trim())
+    };
+
+    btnAgregar.disabled = true;
+    try {
+      const resp = await fetch('guardar.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entry)
+      });
+      const data = await resp.json();
+      if (!resp.ok || !data.ok) throw new Error(data.error || 'respuesta no válida');
+
+      entries.push(entry);
+      renderTabla();
+      actualizarEstado();
+
+      registrarSiEsNuevo('cliente', entry.cliente);
+      registrarSiEsNuevo('proyecto', entry.proyecto);
+
+      clienteEl.value = "";
+      proyectoEl.value = "";
+      actividadEl.value = "";
+      tiempoEl.value = "";
+      // la fecha se mantiene, suele repetirse en varios registros del mismo día
+    } catch (e) {
+      estadoArchivoEl.textContent = 'No se pudo guardar en el servidor (guardar.php). Intenta de nuevo.';
+    }
+    btnAgregar.disabled = false;
+  });
+
+  // ---------- Descargar el reporte del consultor activo (vía descargar.php) ----------
+  btnDescargar.addEventListener('click', () => {
+    if (!consultorActual) return;
+    window.location.href = 'descargar.php?consultor=' + encodeURIComponent(consultorActual);
+  });
+
+  // ---------- Borrar todo y empezar de nuevo, solo para el consultor activo (vía borrar.php) ----------
+  btnLimpiar.addEventListener('click', async () => {
+    if (!consultorActual || entries.length === 0) return;
+    const confirmar = confirm(`¿Borrar los ${entries.length} registros guardados de ${consultorActual}? Si no los has descargado, se perderán. No afecta a los demás consultores.`);
+    if (!confirmar) return;
+
+    try {
+      const resp = await fetch('borrar.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ consultor: consultorActual })
+      });
+      const data = await resp.json();
+      if (!resp.ok || !data.ok) throw new Error(data.error || 'respuesta no válida');
+      entries = [];
+      renderTabla();
+      actualizarEstado();
+    } catch (e) {
+      estadoArchivoEl.textContent = 'No se pudo borrar en el servidor (borrar.php). Intenta de nuevo.';
+    }
+  });
+
+  actualizarDisponibilidad();
+  actualizarEstado();
+  cargarConsultores();
+  cargarListas();
+</script>
+
+</body>
+</html>
