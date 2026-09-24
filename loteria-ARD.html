@@ -69,6 +69,13 @@
     max-width:48ch;
     margin:0 auto;
   }
+  header .contador{
+    margin-top:10px;
+    font-family:'Big Shoulders Display', sans-serif;
+    font-size:12px;
+    letter-spacing:0.04em;
+    color:rgba(244,233,210,0.4);
+  }
 
   .carta{
     background:var(--papel);
@@ -241,12 +248,13 @@
 </head>
 <body>
 <div class="marco">
-  <header> 
-	<h1>Abraham Rosas Decanini</h1>
-	 
-<div class="ceja">54 cartas · sin repetir</div>
+  <header>
+     <h1>Abraham Rosas Decanini</h1>
+
+    <div class="ceja">54 cartas · sin repetir</div>
     <h1>Lotería Mexicana</h1>
     <p>Presiona iniciar y el cantador irá diciendo las cartas en orden aleatorio, sin repetir, hasta terminar el mazo.</p>
+    <p class="contador" id="contador">Cargando visitas...</p>
   </header>
 
   <div class="carta" id="carta">
@@ -267,6 +275,14 @@
     <div class="campo">
       <label for="voz">Voz</label>
       <select id="voz"></select>
+    </div>
+    <div class="campo">
+      <label for="modoVoz">Qué cantar</label>
+      <select id="modoVoz">
+        <option value="ambos" selected>Frase y carta</option>
+        <option value="frase">Solo la frase</option>
+        <option value="carta">Solo el nombre</option>
+      </select>
     </div>
     <div class="campo">
       <label for="espera">Pausa entre cartas</label>
@@ -352,6 +368,7 @@ btnTabla.addEventListener('click', ()=>{
 });
 const vozEl = document.getElementById('voz');
 const esperaEl = document.getElementById('espera');
+const modoVozEl = document.getElementById('modoVoz');
 const estadoEl = document.getElementById('estado');
 const tablaEl = document.getElementById('tabla');
 
@@ -361,6 +378,26 @@ let indiceActual = -1;
 let pausado = false;
 let enCurso = false;
 let temporizador = null;
+
+// Contador de visitas: intenta un contador global gratuito (CountAPI);
+// si no está disponible (sin internet, servicio caído, etc.), usa un
+// contador local guardado solo en este dispositivo.
+(function contarVisita(){
+  const contadorEl = document.getElementById('contador');
+  const NAMESPACE = 'loteria-mexicana-abraham-rosas-decanini';
+  const KEY = 'visitas';
+
+  fetch(`https://api.countapi.xyz/hit/${NAMESPACE}/${KEY}`)
+    .then(r => { if(!r.ok) throw new Error('fallo la API'); return r.json(); })
+    .then(data => {
+      contadorEl.textContent = `Visita número ${data.value}`;
+    })
+    .catch(() => {
+      let local = parseInt(localStorage.getItem('loteria_visitas_local') || '0', 10) + 1;
+      localStorage.setItem('loteria_visitas_local', local);
+      contadorEl.textContent = `Visitas en este dispositivo: ${local}`;
+    });
+})();
 
 // Construir la tabla visual de 54 casillas (número + ícono oculto hasta que se cante)
 for(let i=1;i<=54;i++){
@@ -463,7 +500,16 @@ function siguienteCarta(){
   marcarCasilla(item.n, 'actual');
   actualizarEstado();
 
-  hablar(`${item.canto} ${item.carta}.`, ()=>{
+  let textoACantar;
+  if(modoVozEl.value === 'frase'){
+    textoACantar = item.canto;
+  } else if(modoVozEl.value === 'carta'){
+    textoACantar = item.carta + '.';
+  } else {
+    textoACantar = `${item.canto} ${item.carta}.`;
+  }
+
+  hablar(textoACantar, ()=>{
     marcarCasilla(item.n, 'cantada');
     document.getElementById('casilla-'+item.n).classList.remove('actual');
     document.getElementById('casilla-'+item.n).classList.add('cantada');
